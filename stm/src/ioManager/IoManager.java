@@ -13,8 +13,18 @@ public class IoManager {
     }
 
     public static String printAndInputString(String text) {
-        System.out.println(text);
+        System.out.print(text);
         return scanner.nextLine();
     }
 
+    public static int printAndInputInteger(String text) {
+        System.out.println(text);
+        while (!scanner.hasNextInt()) {
+            System.out.print("\n유효하지 않은 값입니다. 다시 입력해주세요. \n > ");
+            scanner.nextLine();
+        }
+        int number = scanner.nextInt();
+        scanner.nextLine();
+        return number;
+    }
 }
