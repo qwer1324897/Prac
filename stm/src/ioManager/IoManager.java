@@ -14,14 +14,19 @@ public class IoManager {
 
     public static String printAndInputString(String text) {
         System.out.print(text);
-        return scanner.nextLine();
+        String valueText = scanner.nextLine();
+        while (valueText.trim().isEmpty()) {
+            System.out.print("\n이름은 공란일 수 없습니다. 다시 입력해주세요. \n > ");
+            valueText = scanner.nextLine();
+        }
+        return valueText.trim();
     }
 
     public static int printAndInputInteger(String text) {
         System.out.println(text);
-        while (!scanner.hasNextInt()) {
+        while (!scanner.hasNextInt()) { // hasNextInt api는 scanner.nextLine() 으로 값을 자동으로 읽고 불리언을 출력한다.
             System.out.print("\n유효하지 않은 값입니다. 다시 입력해주세요. \n > ");
-            scanner.nextLine();
+            scanner.nextLine(); // 엔터키 청소(int는 필수. String은 아님.)
         }
         int number = scanner.nextInt();
         scanner.nextLine();

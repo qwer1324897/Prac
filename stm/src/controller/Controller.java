@@ -48,7 +48,7 @@ public class Controller {
 
     private void showSubMenu(String userSelectCommand) {
         if(userInputCommand.equals("1")) {
-
+            service
         } else if(userInputCommand.equals("2")) {
 
         } else if(userInputCommand.equals("3")) {
