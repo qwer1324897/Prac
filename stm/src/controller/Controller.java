@@ -10,11 +10,14 @@ import ioManager.IoManager;
 
 public class Controller {
     
+    Scanner sc = new Scanner(System.in);
+
     public void run() {
         welcome();
         while (true) {
             showMainMenu();
             String userSelectedCommand = selectCommand();
+            pause();
             if(commandIsExit(userSelectedCommand)) {
                 break;
             }
@@ -47,19 +50,19 @@ public class Controller {
     }
 
     private void showSubMenu(String userSelectCommand) {
-        if(userInputCommand.equals("1")) {
-            service
-        } else if(userInputCommand.equals("2")) {
+        if(userSelectCommand.equals("1")) {
+            
+        } else if(userSelectCommand.equals("2")) {
 
-        } else if(userInputCommand.equals("3")) {
+        } else if(userSelectCommand.equals("3")) {
 
-        } else if(userInputCommand.equals("4")) {
+        } else if(userSelectCommand.equals("4")) {
 
-        } else if(userInputCommand.equals("5")) {
+        } else if(userSelectCommand.equals("5")) {
 
-        } else if(userInputCommand.equals("6")) {
+        } else if(userSelectCommand.equals("6")) {
 
-        } else if(userInputCommand.equals("0")) {
+        } else if(userSelectCommand.equals("0")) {
 
         } 
         
@@ -72,9 +75,11 @@ public class Controller {
 
     private void exitProgram() {
         IoManager.print("\n프로그램을 종료합니다. 이용해주셔서 감사합니다.");
-        
+        System.exit(0);
     }
 
-    private void pause() {}
+    private void pause() {
+        sc.nextLine();
+    }
 
 }
