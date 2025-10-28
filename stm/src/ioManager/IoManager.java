@@ -30,6 +30,6 @@ public class IoManager {
         }
         int number = scanner.nextInt();
         scanner.nextLine();
-        return number;
+        return number; 
     }
 }
