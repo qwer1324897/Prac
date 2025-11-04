@@ -1,0 +1,148 @@
+vs코드 자바로 하는 법
+
+java 21 버전 깔고
+
+vs코드에서
+컨트롤 쉬프트 p 누르고
+
+json 치면
+
+prepearence: open user setting
+누르고
+
+
+
+
+{
+        "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            // PowerShell 시작 시 chcp 65001 명령을 실행하도록 인수를 추가
+            "args": [
+                "-NoExit",
+                "/c",
+                "chcp 65001"
+            ]
+        }
+    },
+
+
+
+    "editor.inlayHints.enabled": "off",
+    "editor.mouseWheelZoom": true,
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-21",
+            "path": "C:\\DevTools\\Amazon-corretto\\jdk21.0.8_9",
+            "default": true
+        }
+    ],
+    "editor.stickyScroll.enabled": false
+}
+
+
+
+
+
+
+이거 복붙하고 껏다켜서 설정 됏는지 확인
+
+ㅡㅡㅡ 프로젝트생성ㅡㅡㅡㅡ
+
+vs코드 메인화면에서 컨트롤 쉬프트 p 누르고
+
+java create jav project 
+
+no build tool
+
+프로젝트 저장할 위치 찾아서 정하고 엔터
+
+프로젝트 이름 - 엔터
+
+
+이후 프로젝트 맨위로 올리기
+
+이후 프로젝트 들어가서 scr > App.java  클릭
+
+좌측 하단 JAVA Projects 맨 위로 올리기
+
+(혹시 레이아웃 초기화 시키고 싶으면 메인화면에서 컨트롤 + 쉬프트 + p 누르고 view reset locations)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+도커 데스크탑
+
+위에 searc창에다가 mariadb검색하고
+버전 11.4-ubi  run
+
+container name은 mariadb_11.4
+ports는 3306
+Volumes는 공란
+Environment varaivles는
+
+Variable은 MARIADB_ROOT_PASSWORD
+Value는 1234
+
+Environment varaivles + 버튼으로 하나 추가해서
+Variable은 TZ
+Value는 Asia/Seoul (대소문자 주의)
+
+
+dbeaver 커뮤니티버전으로 윈도우 다운
+
+메인 화면에서 좌측 상단 file 밑에있는 플러그모양 클릭해서 마리아db 고르고 next
+root 패스워드 설정 (1234)
+좌측하단 테스트 커넥션 클릭 다운로드 뜨면 클릭 ok클릭 > finish
+
+좌측 localhost 우클릭해서 sql에디터 에서 new sql 스크립트 클릭
+우측에다가
+CREATE DATABASE test; 쓰고 좌측에 주황색 재생표시 클릭하거나 컨트롤+엔터로 그 줄을 실행시킬 수 있다. 실행.
+
+2번째 줄에 CREATE USER 'test'@'%' IDENTIFIED BY '!@TEST1234'; (암호 대소문자 확인)
+치고 컨트롤 엔터
+
+3번째 줄에 GRANT ALL PRIVILEGES ON test.* TO 'test'@'%';
+치고 컨트롤 엔터
+
+4번째 줄에 FLUSH PRIVILEGES;
+치고 컨트롤 엔터
+
+그리고 X표시로 해당 창 닫아주고
+좌측 localhost를 우클릭 눌러서 삭제 (헷갈림 방지)
+
+다시 좌측상단 플러그 플러스 표시 버튼 눌러서 마리아 db실행
+그리고 데이터베이스에 test
+유저 네임에 test
+비번 !@TEST1234 치고 test 커넥션 확인 > 제대로 됐으면 finish
+
+왼쪽 test 로컬 호스트에 비버아래에 초록색 체크표시 확인 (접속중. 정상상태. 우클릭 누르고 disconnect로 연결 끊을 수 있음.)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
