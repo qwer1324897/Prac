@@ -1,0 +1,334 @@
+
+-- DDL (아직 신경쓰지 말 것) --
+
+DROP TABLE Book;
+CREATE TABLE Book(
+	bookid INT,
+	bookname VARCHAR(30),
+	publisher VARCHAR(30),
+	price INT
+);
+
+DROP TABLE Orders;
+CREATE TABLE Orders(
+	orderid INT,
+	custid INT,
+	bookid INT,
+	saleprice INT,
+	orderdate DATETIME
+);
+
+DROP TABLE Customer;
+CREATE TABLE Customer(
+	custid INT,
+	name VARCHAR(20),
+	address VARCHAR(200),
+	phone VARCHAR(30)
+);
+
+-- SQL: DML, DDL, DCL 이 있지만,
+-- DML의 SELECT만 정복하면 나머지는 알아서 해결된다.
+
+-- 이게 mariaDB 주석
+SELECT now();
+
+SELECT 1234;
+
+-- DML: 데이터 조작언어 (CRUD)
+-- INSERT, SELECT, UPDATE, DELETE
+
+-- INSERT
+INSERT INTO Book(bookid, bookname, publisher, price) VALUES
+(1, '축구의 역사', '굿스포츠', 7000),
+(2, '축구아는 여자', '나무수', 13000),
+(3, '축구의 이해', '대한미디어', 22000),
+(4, '골프 바이블', '대한미디어', 35000),
+(5, '피겨 교본', '굿스포츠', 8000),
+(6, '역도 단계별기술', '굿스포츠', 6000),
+(7, '야구의 추억', '이상미디어', 20000),
+(8, '야구를 부탁해', '이상미디어', 13000),
+(9, '올림픽 이야기', '삼성당', 7500),
+(10, 'Olympic Champions', 'Pearson', 13000);
+
+INSERT INTO Orders(orderid, custid, bookid, saleprice, orderdate) VALUES
+(1, 1, 1, 6000, '2014-07-01'),
+(2, 1, 3, 21000, '2014-07-03'),
+(3, 2, 5, 8000, '2014-07-03'),
+(4, 3, 6, 6000, '2014-07-04'),
+(5, 4, 7, 20000, '2014-07-05'),
+(6, 1, 2, 12000, '2014-07-07'),
+(7, 4, 8, 13000, '2014-07-07'),
+(8, 3, 10, 12000, '2014-07-08'),
+(9, 2, 10, 7000, '2014-07-09'),
+(10, 3, 8, 13000, '2014-07-10');
+
+INSERT INTO Customer(custid, name, address, phone) VALUES
+(1, '박지성', '영국 맨체스터', '000-5000-0001'),
+(2, '김연아', '대한민국 서울', '000-6000-0001'),
+(3, '장미란', '대한민국 강원도', '000-7000-0001'),
+(4, '추신수', '미국 클리블랜드', '000-8000-0001'),
+(5, '박세리', '대한민국 대전', NULL);
+
+
+
+SELECT * FROM Book; -- 이걸로 Book을 불러올 수 있다.(상태 확인)
+SELECT * FROM Orders;
+SELECT * FROM Customer;
+
+-- 모든 도서의 이름과 가격을 검색하세요!
+
+SELECT bookname,price FROM Book;
+
+-- 모든 도서의 도서번호 도서이름 출판사 가격을 검색하세요!
+
+SELECT bookid,bookname,publisher,price FROM Book;
+
+-- 도서 테이블에 있는 모든 출판사를 검색하고, 중복을 제거하세요.
+
+SELECT publisher FROM Book;
+SELECT DISTINCT publisher FROM Book;	-- DISTINCT: 중복 제거 문법
+
+-- 가격이 2만원 미만인 도서를 검색하세요.
+
+SELECT * FROM Book WHERE price < 20000;
+
+-- 가격이 1만원 이상, 2만원 이하인 도서를 검색하세요.
+
+SELECT * FROM Book WHERE 10000<= price AND price <= 20000;
+
+
+-- !중요! IN 문법. --
+-- 출판사가 굿스포츠, 대한미디어인 도서를 검색하세요.
+
+SELECT * FROM Book WHERE publisher = '굿스포츠' OR publisher = '대한미디어';
+SELECT * FROM Book WHERE publisher IN('굿스포츠', '대한미디어');	-- 이렇게 하는게 정답!
+SELECT * FROM Book WHERE publisher NOT IN('나무수','이상미디어', '삼성당', 'Pearson');
+SELECT * FROM Book WHERE publisher LIKE '굿스포츠' OR publisher LIKE '대한미디어';
+
+-- 축구의 역사를 출판한 출판사를 검색하세요.
+
+SELECT bookname, publisher FROM Book WHERE bookname LIKE '축구의 역사';
+
+-- 도서 이름에 '축구'가 포함된 책을 출판한 출판사를 검색하세요.
+
+SELECT * FROM Book WHERE bookname LIKE '%축구%';
+
+-- 도서 이름의 왼쪽 두 번째 위치에 '구'라는 문자열을 갖는 도서를 검색하세요.
+
+SELECT * FROM Book WHERE bookname LIKE '_구%';
+
+-- 성이 '김'씨인 사람을 검색하세요.
+
+SELECT * FROM Customer WHERE name LIKE '김%';
+
+-- '축구'라는 단어가 제목에 들어간 도서 중, 가격이 2만원 이상인 도서를 검색하세요.
+
+SELECT * FROM Book WHERE bookname Like '%축구%' AND price >= 20000;
+
+-- 출판사가 '굿스포츠' 혹은 '대한미디어' 인 도서를 검색하세요.
+
+SELECT bookname, publisher FROM Book WHERE publisher = '굿스포츠' OR publisher = '대한미디어';
+
+-- 도서를 이름순으로 검색하세요.
+
+SELECT * FROM Book ORDER BY bookname ASC;
+SELECT * FROM Book ORDER BY bookname DESC;	-- 오름차순, 내림차순 기본이 오름차순이다. 즉, ASC를 그냥 안 쓰면 오름차순이다.
+-- 실무에서는 최신순으로 표현하는 일이 많기 때문에, 내림차순을 쓴다. 보통 최근에 추가한 게 넘버링이 크기 때문에.
+
+-- 도서를 높은 가격순으로 검색하고, 만약 가격이 같다면 이름순으로 검색하세요.
+
+SELECT * FROM Book ORDER BY price ASC,bookname ASC;
+
+-- 고객이 주문한 도서의 총 판매액을 구하세요.
+
+SELECT SUM(saleprice) FROM Orders;	-- 이때 saleprice는 벡터고, 그걸 sum한 값은 스칼라다. 따라서 SUM(여기에다가 벡터를 넣어야 한다.)
+
+-- 김연아(2번) 회원이 구매한 도서의 총 판매액을 구하세요.
+
+SELECT SUM(saleprice) FROM Orders WHERE custid = 2;
+
+-- 고객이 주문한 도서의 총 판매액, 평균값, 최저가, 최고가를 구하세요.
+
+SELECT SUM(saleprice), AVG(saleprice), MIN(saleprice), MAX(saleprice) FROM Orders ;
+
+-- 마당 서점의 도서 판매 건수를 구하세요.
+
+SELECT COUNT(*) FROM Orders;	-- 일반적으로 COUNT는 *을 쓴다.
+
+-- 마당 서점의 도서 판매 건수를 구하고, 그 명칭을 'OrderCount' 로 표현하세요.
+
+SELECT COUNT(*) AS OrderCount FROM Orders;
+
+-- GROUP BY 문법
+-- 고객별로 주문한 도서의 총 수량과 총 판매액을 구하세요.
+
+SELECT custid, COUNT(*), SUM(saleprice) FROM Orders GROUP BY custid;
+-- GROUP BY 를 쓸 때는, SELECT 뒤에 맨 처음 쓰는 필드는 무조건 GROUP BY 뒤에 오는 필드(벡터)값 한 개만 쓴다. 나머지는 무조건 스칼라값으로.
+
+-- 도서별 판매량과 총 매출액을 구하세요.
+
+SELECT bookid, COUNT(*) AS 판매량, SUM(saleprice) FROM Orders
+GROUP BY Bookid
+;
+
+-- 가격이 8000원 이상인 도서를 구매한 고객에 대하여 고객별 주문 도서의 총 수량을 구하세요. 단, 2권 이상 구매한 고객만 구하세요.
+-- GROUP BY로 묶은 뒤에는 GROUP BY 뒤에 바로 쓰인 벡터를 제외하고는 추가로 벡터를 더 쓰면 안 되고 반드시 스칼라를 써야한다.
+-- 위에랑 똑같은 얘기. 그냥 외우면 된다. (사실 어떻게 보면 당연한 것.)
+SELECT custid ,COUNT(*) AS "주문한 도서의 총 수량" 
+FROM Orders
+WHERE saleprice >= 8000
+GROUP BY custid
+HAVING COUNT(*) >= 2
+;
+
+SELECT qwer.* FROM Orders qwer ;
+SELECT o.* FROM Orders o ;	-- 이렇게 별칭을 붙이고 쓸 수 있다.
+
+-- INNER JOIN 문법.
+
+SELECT * FROM Customer c, Orders o WHERE c.custid = o.custid ;	-- 이렇게 여러개의 테이블을 하나로 JOIN 해서 SELECT 할 수 있다.
+
+-- 고객별 주문한 책 로그
+SELECT c.name, b.bookname, b.price, o.saleprice
+FROM Customer c, Orders o, Book b
+WHERE c.custid = o.custid AND o.bookid = b.bookid
+ORDER BY c.name;
+
+-- INNER JOIN - ANSI 조인 위처럼 쉼표로 하지 않고 INNER JOIN을 써서 가독성을 높인다.
+SELECT *
+FROM Orders o
+INNER JOIN Customer c ON c.custid = o.custid
+WHERE c.name = '박지성';
+
+SELECT c.name, b.bookname, b.price, o.saleprice
+FROM Orders o
+INNER JOIN Book b ON o.bookid = b.bookid 
+INNER JOIN Customer c ON o.custid = c.custid
+;
+
+-- 고객과 고객의 주문에 관한 데이터를 모두 보이세요.
+
+SELECT *
+FROM Customer c 
+INNER JOIN Orders o ON o.custid = c.custid
+ORDER BY c.custid 
+;
+
+-- 고객의 이름과 고객이 주문한 도서의 판매가격을 검색하세요.
+
+SELECT c.name, o.saleprice
+FROM Orders o 
+INNER JOIN Customer c ON c.custid = o.custid 
+;
+
+-- 고객별로 주문한 모든 도서의 총 판매액을 구하고, 고객별로 정렬하세요.
+
+SELECT c.name, SUM(o.saleprice) FROM Orders o 
+INNER JOIN Customer c ON c.custid = o.custid 
+GROUP BY c.name
+ORDER BY c.name
+;	-- 이렇게 짜버리면 동명이인이 있을 경우, 잘못된 리턴값이 나오기 때문에
+
+SELECT c.custid, c.name, SUM(o.saleprice)
+FROM Orders o 
+INNER JOIN Customer c ON c.custid = o.custid 
+GROUP BY c.custid, c.name
+ORDER BY c.custid 
+;
+
+-- 고객의 이름과 고객이 주문한 도서의 이름을 구하세요.
+
+SELECT c.name, b.bookname FROM Customer c 
+INNER JOIN Orders o ON c.custid = o.custid 
+INNER JOIN Book b ON o.bookid  = b.bookid 
+;
+
+-- 가격이 2만원인 도서를 주문한 고객의 이름과 도서의 이름을 구하세요.
+
+SELECT c.name, b.bookname FROM Customer c 
+INNER JOIN Orders o ON c.custid = o.custid 
+INNER JOIN Book b ON o.bookid  = b.bookid 
+WHERE b.price >= 20000
+;
+
+-- 도서를 구매하지 않은 고객을 포함하여 고객의 이름과 고객이 주무한 도서의 판매액을 구하세요.
+-- (외부 조인 문법. OUTER JOIN)
+SELECT c.name, o.saleprice FROM Orders o 
+INNER JOIN Customer c ON c.custid = o.custid 
+;	-- 이 경우, 도서를 구매하지 않은 박세리는 조회가 되지 않는다. 따라서,
+SELECT c.name, o.saleprice FROM Customer c
+LEFT OUTER JOIN Orders o ON o.custid = c.custid 
+	-- Customer 을 기준으로 조인이 됐기 때문에 박세리도 출력된다. 만약 c랑 o를 바꿔서 조인하면 오더 테이블에 커스터머가 붙는 거기 때문에 이너조인과 같다.
+;
+
+-- 부속 질의(서브쿼리)
+
+SELECT (SELECT 1111)
+FROM (
+	SELECT * FROM Book b
+) aaa
+WHERE aaa.bookid = (SELECT 3333)
+;	-- 이렇게 SELECT, FROM, WHERE 등 안에 SELECT를 쓸 수 있다. 
+
+-- 가장 비싼 도서의 정보를 구하세요.
+
+SELECT * FROM Book b WHERE b.price;
+SELECT MAX(b.price) FROM Book b ;	-- 이 두개의 정보를 합치면 질문에 대한 답이 된다.
+
+SELECT *
+FROM Book b
+WHERE b.price = (
+	SELECT MAX(b.price)
+	FROM Book b
+);	-- 이렇게.
+
+SELECT o.saleprice FROM Orders o;
+SELECT * FROM Book b WHERE b.price > ALL(SELECT o.saleprice FROM Orders o) ;
+SELECT * FROM Book b WHERE b.price > ANY(SELECT o.saleprice FROM Orders o) ;
+
+-- 도서를 구매한 적이 있는 고객의 이름을 검색하세요.
+
+SELECT c.name FROM Customer c 
+WHERE c.custid IN(SELECT o.custid FROM Orders o);
+
+-- '대한미디어'에서 출판한 도서를 구매한 고객의 정보를 보이세요.
+
+SELECT * FROM Customer c 
+WHERE c.custid IN(
+	SELECT o.custid FROM Orders o WHERE o.bookid IN(
+		SELECT b.bookid FROM Book b WHERE b.publisher = '대한미디어'
+	)
+)
+;
+
+SELECT b.bookid FROM Book b WHERE b.publisher = '대한미디어' ;
+-- 이런 문제 풀 때는, 한 번에 넣는게 아니라 하나하나 뜯어서 생각하고 조립해야 한다. --
+
+-- 출판사별로 출판사의 평균 도서 가격보다 비싼 도서를 구하세요.
+
+SELECT * FROM Book b
+WHERE b.price > (
+	SELECT AVG(b2.price) FROM Book b2 WHERE b2.publisher = b.publisher 
+)
+;
+SELECT AVG(b2.price) FROM Book b2 WHERE b2.publisher = '나무수';
+
+-- 주문이 있는 고객의 이름과 주소를 보이세요. EXISTS 문법.
+
+SELECT c.name, c.address FROM Customer c
+WHERE EXISTS(	-- EXISTS 안에 결과가 존재하면 true, 아니면 false
+	SELECT * FROM Orders o WHERE o.custid = c.custid 	
+)
+;
+
+-- 도서를 주문하지 않은 고객의 이름을 보이세요.
+
+SELECT c.name FROM Customer c 
+WHERE 
+;
+
+
+
+
+
+
