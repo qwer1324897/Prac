@@ -1,0 +1,197 @@
+
+DROP TABLE Book;
+CREATE TABLE Book(
+	bookid INT,
+	bookname VARCHAR(30),
+	publisher VARCHAR(30),
+	price INT
+);
+
+DROP TABLE Orders;
+CREATE TABLE Orders(
+	orderid INT,
+	custid INT,
+	bookid INT,
+	saleprice INT,
+	orderdate DATETIME
+);
+
+DROP TABLE Customer;
+CREATE TABLE Customer(
+	custid INT,
+	name VARCHAR(20),
+	address VARCHAR(200),
+	phone VARCHAR(30)
+);
+
+-- INSERT
+INSERT INTO Book(bookid, bookname, publisher, price) VALUES
+(1, '축구의 역사', '굿스포츠', 7000),
+(2, '축구아는 여자', '나무수', 13000),
+(3, '축구의 이해', '대한미디어', 22000),
+(4, '골프 바이블', '대한미디어', 35000),
+(5, '피겨 교본', '굿스포츠', 8000),
+(6, '역도 단계별기술', '굿스포츠', 6000),
+(7, '야구의 추억', '이상미디어', 20000),
+(8, '야구를 부탁해', '이상미디어', 13000),
+(9, '올림픽 이야기', '삼성당', 7500),
+(10, 'Olympic Champions', 'Pearson', 13000);
+
+INSERT INTO Orders(orderid, custid, bookid, saleprice, orderdate) VALUES
+(1, 1, 1, 6000, '2014-07-01'),
+(2, 1, 3, 21000, '2014-07-03'),
+(3, 2, 5, 8000, '2014-07-03'),
+(4, 3, 6, 6000, '2014-07-04'),
+(5, 4, 7, 20000, '2014-07-05'),
+(6, 1, 2, 12000, '2014-07-07'),
+(7, 4, 8, 13000, '2014-07-07'),
+(8, 3, 10, 12000, '2014-07-08'),
+(9, 2, 10, 7000, '2014-07-09'),
+(10, 3, 8, 13000, '2014-07-10');
+
+INSERT INTO Customer(custid, name, address, phone) VALUES
+(1, '박지성', '영국 맨체스터', '000-5000-0001'),
+(2, '김연아', '대한민국 서울', '000-6000-0001'),
+(3, '장미란', '대한민국 강원도', '000-7000-0001'),
+(4, '추신수', '미국 클리블랜드', '000-8000-0001'),
+(5, '박세리', '대한민국 대전', NULL);
+
+SELECT * FROM Book; -- 이걸로 Book을 불러올 수 있다.(상태 확인)
+SELECT * FROM Orders;
+SELECT * FROM Customer;
+
+
+-- 1 마당서점의 고객이 요구하는 다음 질문에 대해 SQL 문을 작성하시오.
+--   (5) 박지성이 구매한 도서의 출판사 수
+SELECT c.custid, c.name, COUNT(b.publisher) AS "1번 박지성 고객이 구매한 도서의 출판사 수"
+FROM Customer c 
+INNER JOIN Orders o ON o.custid = c.custid 
+INNER JOIN Book b ON b.bookid = o.bookid 
+WHERE c.custid = '1'
+;
+--   (6) 박지성이 구매한 도서의 이름, 가격, 정가와 판매가격의 차이
+SELECT c.custid, c.name , b.bookname ,b.price, b.publisher AS "도서 정가",o.saleprice AS 판매가 ,b.price - o.saleprice AS "정가와 판매가격의 차이"
+FROM Customer c 
+INNER JOIN Orders o ON o.custid = c.custid 
+INNER JOIN Book b ON b.bookid = o.bookid 
+WHERE c.custid = '1'
+;
+--   (7) 박지성이 구매하지 않은 도서의 이름
+
+SELECT *
+FROM Book b 
+WHERE b.bookid NOT IN(
+	SELECT o2.bookid 
+	FROM Customer c2 
+	INNER JOIN Orders o2 ON o2.custid = c2.custid 
+	WHERE c2.custid = '1'
+	)
+;
+
+-- 2 마당서점의 운영자와 경영자가 요구하는 다음 질문에 대해 SQL 문을 작성하시오.
+--   (8) 주문하지 않은 고객의 이름(부속질의 사용)
+
+--   (9) 주문 금액의 총액과 주문의 평균 금액
+SELECT SUM(o.saleprice) , AVG(o.saleprice)
+FROM Orders o 
+;
+--   (10) 고객의 이름과 고객별 구매액
+SELECT c.custid, c.name, SUM(o.saleprice) AS "고객별 구매액"
+FROM Customer c 
+INNER JOIN Orders o ON o.custid = c.custid 
+INNER JOIN Book b ON b.bookid = o.bookid 
+GROUP BY c.custid, c.name 
+ORDER BY c.custid 
+;
+--   (11) 고객의 이름과 고객이 구매한 도서 목록
+SELECT c.name, b.bookname 
+FROM Customer c 
+INNER JOIN Orders o ON o.custid = c.custid 
+INNER JOIN Book b ON b.bookid = o.bookid 
+ORDER BY c.custid 
+;
+--   (12) 도서의 가격(Book 테이블)과 판매가격(Orders 테이블)의 차이가 가장 많은 주문
+
+SELECT o.*
+FROM Orders o
+INNER JOIN Book b ON b.bookid = o.bookid
+WHERE b.price - o.saleprice = (
+	SELECT MAX(b.price - o.saleprice )
+	FROM Orders o
+	INNER JOIN Book b ON b.bookid = o.bookid 
+)
+;
+
+SELECT b.bookname , b.price - o.saleprice AS '가격차이'
+FROM Orders o 
+INNER JOIN Book b ON b.bookid = o.bookid 
+ORDER BY '가격차이' DESC    
+;
+
+--   (13) 도서의 판매액 평균보다 자신의 구매액 평균이 더 높은 고객의 이름
+
+SELECT c.custid, c.name , AVG(o.saleprice)
+FROM Customer c
+INNER JOIN Orders o ON o.custid = c.custid 
+GROUP BY c.custid, c.name 
+HAVING AVG(o.saleprice) > (SELECT AVG(o.saleprice) FROM Orders o)
+;
+
+ 
+-- 3 마당서점에서 다음의 심화된 질문에 대해 SQL 문을 작성하시오.
+
+--   (1) 박지성이 구매한 도서의 출판사와 같은 출판사에서 도서를 구매한 고객의 이름
+
+SELECT c.name, b.publisher FROM Customer c
+INNER JOIN Orders o ON o.custid = c.custid 
+INNER JOIN Book b ON b.bookid = o.bookid
+WHERE b.publisher IN(
+	SELECT b.publisher FROM Customer c
+	INNER JOIN Orders o ON o.custid = c.custid 
+	INNER JOIN Book b ON b.bookid = o.bookid
+	WHERE c.custid = 1
+) AND c.custid != 1
+;
+
+--   (2) 두 개 이상의 서로 다른 출판사에서 도서를 구매한 고객의 이름
+
+SELECT c.name FROM Customer c
+INNER JOIN Orders o ON o.custid = c.custid 
+INNER JOIN Book b ON b.bookid = o.bookid
+WHERE (
+	SELECT COUNT(b.publisher) FROM Customer c
+	INNER JOIN Orders o ON o.custid = c.custid 
+	INNER JOIN Book b ON b.bookid = o.bookid
+	GROUP BY b.publisher
+	) > 2
+;
+
+SELECT b.publisher, COUNT(b.publisher) FROM Customer c
+INNER JOIN Orders o ON o.custid = c.custid 
+INNER JOIN Book b ON b.bookid = o.bookid
+GROUP BY b.publisher 
+;
+--   (3) (생략) 전체 고객의 30% 이상이 구매한 도서 
+
+SELECT 
+FROM Customer c 
+
+;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

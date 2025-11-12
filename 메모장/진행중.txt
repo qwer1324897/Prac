@@ -169,17 +169,41 @@ SELECT c.name, SUM(o.saleprice)
 FROM Customer c 
 INNER JOIN Orders o ON o.custid = c.custid 
 ORDER BY c.custid
+;
 -- 이렇게 짜버리면 동명이인이 있을 경우, 잘못된 리턴값이 나오기 때문에
 
 -- 고객의 이름과 고객이 주문한 도서의 이름을 구하세요.
 
+SELECT c.custid, c.name, b.bookname, b.publisher
+FROM Customer c
+INNER JOIN Orders o ON o.custid = c.custid
+INNER JOIN Book b ON b.bookid = o.bookid
+ORDER BY c.custid
+;
 -- 가격이 2만원인 도서를 주문한 고객의 이름과 도서의 이름을 구하세요.
-
+SELECT c.custid, c.name, b.bookname, b.price 
+FROM Customer c
+INNER JOIN Orders o ON o.custid = c.custid
+INNER JOIN Book b ON b.bookid = o.bookid
+WHERE b.price = 20000
+ORDER BY c.custid
+;
 -- 도서를 구매하지 않은 고객을 포함하여 고객의 이름과 고객이 주무한 도서의 판매액을 구하세요.
 -- (외부 조인 문법. OUTER JOIN)
-
+SELECT c.custid, c.name, b.bookname, o.saleprice
+FROM Customer c 
+LEFT OUTER JOIN Orders o ON o.custid = c.custid
+LEFT OUTER JOIN Book b ON b.bookid = o.bookid
+ORDER BY c.custid 
+;
 -- 가장 비싼 도서의 정보를 구하세요.
-
+SELECT *
+FROM Book b 
+WHERE b.price = (
+	SELECT MAX(b2.price)
+	FROM Book b2
+) 
+;
 -- 도서를 구매한 적이 있는 고객의 이름을 검색하세요.
 
 -- '대한미디어'에서 출판한 도서를 구매한 고객의 정보를 보이세요.

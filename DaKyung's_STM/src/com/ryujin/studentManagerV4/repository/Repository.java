@@ -1,5 +1,6 @@
 package com.ryujin.studentManagerV4.repository;
 
+import java.sql.PseudoColumnUsage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +45,7 @@ public class Repository {
         }
         list = newList;
     }
-
+   
     public List<StudentDto> sortByScore() {
         List<StudentDto> newList = copyList(list);
         for (int i = 0; i < newList.size() - 1; i++) {

@@ -245,7 +245,8 @@ INNER JOIN Book b ON o.bookid  = b.bookid
 
 -- 가격이 2만원인 도서를 주문한 고객의 이름과 도서의 이름을 구하세요.
 
-SELECT c.name, b.bookname FROM Customer c 
+SELECT c.name, b.bookname
+FROM Customer c 
 INNER JOIN Orders o ON c.custid = o.custid 
 INNER JOIN Book b ON o.bookid  = b.bookid 
 WHERE b.price >= 20000
@@ -253,10 +254,12 @@ WHERE b.price >= 20000
 
 -- 도서를 구매하지 않은 고객을 포함하여 고객의 이름과 고객이 주무한 도서의 판매액을 구하세요.
 -- (외부 조인 문법. OUTER JOIN)
-SELECT c.name, o.saleprice FROM Orders o 
+SELECT c.name, o.saleprice
+FROM Orders o 
 INNER JOIN Customer c ON c.custid = o.custid 
 ;	-- 이 경우, 도서를 구매하지 않은 박세리는 조회가 되지 않는다. 따라서,
-SELECT c.name, o.saleprice FROM Customer c
+SELECT c.name, o.saleprice
+FROM Customer c
 LEFT OUTER JOIN Orders o ON o.custid = c.custid 
 	-- Customer 을 기준으로 조인이 됐기 때문에 박세리도 출력된다. 만약 c랑 o를 바꿔서 조인하면 오더 테이블에 커스터머가 붙는 거기 때문에 이너조인과 같다.
 ;
@@ -278,10 +281,10 @@ SELECT MAX(b.price) FROM Book b ;	-- 이 두개의 정보를 합치면 질문에
 SELECT *
 FROM Book b
 WHERE b.price = (
-	SELECT MAX(b.price)
-	FROM Book b
-);	-- 이렇게.
-
+	SELECT MAX(b2.price)
+	FROM Book b2
+);	
+-- 이렇게
 SELECT o.saleprice FROM Orders o;
 SELECT * FROM Book b WHERE b.price > ALL(SELECT o.saleprice FROM Orders o) ;
 SELECT * FROM Book b WHERE b.price > ANY(SELECT o.saleprice FROM Orders o) ;
@@ -308,7 +311,9 @@ SELECT b.bookid FROM Book b WHERE b.publisher = '대한미디어' ;
 
 SELECT * FROM Book b
 WHERE b.price > (
-	SELECT AVG(b2.price) FROM Book b2 WHERE b2.publisher = b.publisher 
+	SELECT AVG(b2.price)
+	FROM Book b2
+	WHERE b2.publisher = b.publisher 
 )
 ;
 SELECT AVG(b2.price) FROM Book b2 WHERE b2.publisher = '나무수';
@@ -323,9 +328,201 @@ WHERE EXISTS(	-- EXISTS 안에 결과가 존재하면 true, 아니면 false
 
 -- 도서를 주문하지 않은 고객의 이름을 보이세요.
 
-SELECT c.name FROM Customer c 
-WHERE 
+SELECT c.name  
+FROM Customer c
+LEFT JOIN Orders o ON c.custid = o.custid  
+WHERE o.orderid IS NULL
+; 
+
+
+
+
+-- 함수 .
+
+-- 내장 함수 연습 - 어차피 다 못외우기 때문에 api처럼 그때 그때 찾아서 쓴다. 그럼에도 자주 쓰는 걸 보자면
+
+SELECT b.price/3 FROM Book b ;
+-- 이렇게 하면 소수점이 너무 많아서 보기 불편하니까
+
+SELECT ROUND(b.price/3) FROM Book b ;
+-- 이것도 숫자가 깔끔하지 않으니까 추가로 반올림이나 버림을 한다
+
+SELECT ROUND(b.price/3, -2) FROM Book b ;
+-- 사실 반올림(ROUND) 보단 실무에선 버림(TRUNCATE)이 더 많이 쓰인다. ex. 20대, 30대, 등등...
+SELECT TRUNCATE(b.price/3, -2) FROM Book b ;
+
+-- 또 자주 쓰이는 것. CONCAT. 문자열 연산. JAVA에서는 그냥 + 로 문자열을 붙일 수 있었지만...
+
+SELECT *
+FROM Book b 
+WHERE b.bookname LIKE '%축구%';
+-- 보안 이슈 때문에 실무에서는 LIKE를 이렇게 쓰진 않고,
+SELECT *
+FROM Book b 
+WHERE b.bookname LIKE CONCAT('%', '축구', '%') ;
+-- 이렇게 쓴다. 이건 그냥 무조건 다 이렇게 하는거라 외우면 된다.
+
+
+-- NOW(); 현재 시간을 표시.
+
+SELECT *
+FROM Orders o 
+WHERE o.orderdate < NOW() ;
+
+-- 판매량 베스트 3 도서
+SELECT b.bookid , b.bookname , COUNT(*) AS '도서별 판매 수량'
+FROM Orders o 
+INNER JOIN Book b ON b.bookid = o.bookid
+GROUP BY b.bookid, b.bookname 
+ORDER BY COUNT(*) DESC
+LIMIT 3
 ;
+
+-- 판매량 베스트 3 도서 (최근 7일 기준)
+SELECT b.bookid , b.bookname , COUNT(*) AS '도서별 판매 수량'
+FROM Book b
+INNER JOIN Orders o ON o.bookid = b.bookid 
+WHERE o.orderdate > DATE_SUB(NOW(), INTERVAL 7 DAY)
+GROUP BY b.bookid, b.bookname
+ORDER BY COUNT(*) DESC
+LIMIT 3
+;
+
+SELECT *
+FROM Customer c
+WHERE c.phone IS NULL
+;
+
+-- 만약 구매가격에 NULL 값이 있는 경우, 합산 구하기
+SELECT IFNULL(c.phone, 'qwer')
+FROM Customer c ;
+
+SELECT SUM(IFNULL(o.saleprice, 0))
+FROM Orders o ;
+-- 이렇게 null값이면 값을 대체할 수 있다.
+
+-- ROWNUM의 가장 흔한 용도는 쿼리 결과의 상위 몇 개만 가져오는 것입니다. MariaDB에서는 이를 위해 LIMIT 절을 사용합니다.
+-- 가격이 가장 비싼 상위 3개 도서를 검색 (ROWNUM < 4와 동일한 효과)
+SELECT *
+FROM Book
+ORDER BY price DESC  -- 반드시 정렬 후 LIMIT을 적용해야 의미가 있음
+LIMIT 3;
+
+
+
+-- 인라인뷰. FROM 부속질의 ---------------------------------
+
+
+SELECT o.custid, SUM(o.saleprice) AS '총 판매액'
+FROM Orders o
+GROUP BY o.custid 
+;
+-- 이 데이터를 테이블처럼 묶어서 FROM 안에 넣을 수 있다.(FROM 부속질의)
+
+SELECT * FROM (
+	SELECT o.custid, SUM(o.saleprice) AS qwer
+	FROM Orders o
+	GROUP BY o.custid 
+) t1 ;
+-- 이렇게. 그리고 별칭을 붙여서 메서드처럼 쓸 수 있다.
+SELECT * FROM (
+	SELECT o.custid, SUM(o.saleprice) AS qwer
+	FROM Orders o
+	GROUP BY o.custid 
+) t1
+WHERE t1.qwer > 20000
+;	-- 이렇게. WHERE을 안에 쓴 것과 차이점은, 괄호 안의 계산이 전부 끝난 뒤에 실행한다는 점이다.
+
+
+-- 총 구매액이 20000원 이상인 고객의 판매액을 보이세요(고객 이름과 고객별 판매액 출력)
+
+SELECT c.name, t1.qwer FROM (
+	SELECT o.custid, SUM(o.saleprice) as qwer
+	FROM Orders o 
+	GROUP BY o.custid
+	-- HAVING SUM(o.salepric) > 20000 --> 원래 이렇게 했었다.
+) t1
+INNER JOIN Customer c ON c.custid  = t1.custid 
+WHERE t1.qwer > 20000
+;
+
+
+-- 스칼라 부속질의 - SELECT 부속질의 ---------
+-- 마당서점의 고객별 판매액을 보이세요.
+
+SELECT o.custid , SUM(o.saleprice)
+FROM Orders o 
+GROUP BY o.custid 
+; -- 이 코드를 custid로 하는 이유는, 동명이인이나 중복될 염려가 있기 때문인데,
+
+SELECT c.name FROM Customer c WHERE c.custid = 1;
+-- 이 코드는 같은 c.name이지만 WHERE 조건으로 단 한가지의 조건으로 국한해었기 때문에 이 코드를 위에다 넣으면 된다.
+
+SELECT (
+	SELECT c.name FROM Customer c WHERE c.custid = o.custid
+	) as qwer, SUM(o.saleprice)
+FROM Orders o 
+GROUP BY o.custid 
+; -- 이렇게 하면 SELECT 안 쪽이 유일한 c.name이 된다. 주의할 점은 반드시 스칼라값만 넣을 수 있다.
+
+
+-- 아무것도 구매하지 않은 고객을 포함하여 고객별 판매액과 수량을 구하세요. (GROUP BY를 안 쓰고)
+
+SELECT c.*, (
+	SELECT COUNT(*) FROM Orders o WHERE o.custid = c.custid
+) as cnt, (
+	SELECT SUM(o.saleprice) FROM Orders o WHERE o.custid = c.custid
+) as total
+FROM Customer c 
+;	-- 이렇게 SELECT 부속질의(주의. 스칼라만 가능)를 계속 써서 GROUP BY처럼 표현할 수 있다. 단점은 처리속도가 GROUP BY에 비해 느리다.
+
+-- 평균 주문금액 이하의 주문에 대하여 주문번호와 금액을 보이세요.
+SELECT *
+FROM Orders o 
+WHERE o.saleprice <= (SELECT AVG(o2.saleprice) FROM Orders o2)
+;	-- 이때 WHERE <= 뒤에 오는 값은 당연히 스칼라값이어야 한다.
+
+-- 각 고객의 평균 주문 금액보다 큰 금액의 주문 내역에 대해서 주문번호, 고객번호, 금액을 보이세요.
+SELECT *
+FROM Orders o 
+WHERE o.saleprice > (
+	SELECT AVG(o2.saleprice) FROM Orders o2 WHERE o2.custid = o.custid
+);
+
+-- '대한민국'에 거주하는 고객에게 판매한 도서의 총판매액을 구하세요.
+SELECT SUM(o.saleprice) 
+FROM Orders o 
+WHERE o.custid IN (qwer)
+;	-- 여기서 qwer 안에 '대한민국'에 사는 고객 넣으면 된다.
+
+SELECT c.custid FROM Customer c WHERE c.address LIKE '%대한민국%';
+
+SELECT SUM(o.saleprice) 
+FROM Orders o 
+WHERE o.custid IN (
+	SELECT c.custid FROM Customer c WHERE c.address LIKE '%대한민국%'
+);
+
+-- 3번 고객이 주문한 도서의 최고 금액보다 더 비싼 도서를 구입한 주문의 주문번호와 금액을 보이세요.
+SELECT * FROM Orders o 
+WHERE o.saleprice > 0000;	-- 0000 안에 이제 조건에 맞는 코드를 넣으면 된다.
+
+SELECT o2.saleprice FROM Orders o2 WHERE o2.custid = 3 -- 이걸 그대로 넣으면 타입오류가 떠서 ALL을 붙인다.
+
+SELECT * FROM Orders o 
+WHERE o.saleprice > ALL(SELECT o2.saleprice FROM Orders o2 WHERE o2.custid = 3)
+;	-- 이렇게.
+
+-- EXISTS 를 써서 '대한민국'에 거주하는 고객에게 판매한 도서의 총판매액을 구하세요.
+SELECT SUM(o.saleprice) FROM Orders o
+WHERE EXISTS ( 
+	SELECT * FROM Customer c
+	WHERE c.address LIKE '%대한민국%' AND c.custid = o.custid 
+);
+
+
+
+
 
 
 
