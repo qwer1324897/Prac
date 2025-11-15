@@ -51,23 +51,23 @@ public class Controller {
 
     private void showSubMenu(String command) {
         if (command.equals("1")) {
-            
+            service.addStudent();
         }
-        if (command.equals("2")) {
-
+        else if (command.equals("2")) {
+            service.listStudent();
         }
-        if (command.equals("3")) {
-
+        else if (command.equals("3")) {
+            service.searchStudent();
         }
-        if (command.equals("4")) {
-
+        else if (command.equals("4")) {
+            service.removeStudent();
         }
-        if (command.equals("5")) {
-
+        else if (command.equals("5")) {
+            service.stats();
         }
         else {
             IoManager.print("\n유효하지 않은 값입니다.");
-            IoManager.print("다시 입력해주세요. > ");
+            IoManager.print("다시 입력해주세요.");
         }
     }
 
@@ -79,16 +79,4 @@ public class Controller {
     private void pause() {
         IoManager.pause();
     }
-
-
-
-
-
-
-// 주제: 학생 정보 관리 프로그램
-
-//         // 기능: 학생 정보 등록, 목록, 검색, 삭제, 수정...
-
-//         // 한 명의 학생의 데이터: 이름, 나이, 성적
-
 }

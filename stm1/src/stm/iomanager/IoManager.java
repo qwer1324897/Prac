@@ -17,10 +17,11 @@ public class IoManager {
         return sc.nextLine();
     }   // 원하는 문구 출력 + 문자열 입력받는 메서드
 
-    public static Integer printAndInputInteger(Integer input) {
+    public static Integer printAndInputInteger(String input) {
         System.out.print(input);
-        String userInput = sc.nextLine();
-        return Integer.parseInt(userInput.trim());
+        Integer userInput = sc.nextInt();
+        sc.nextLine(); // int 입력받고 나서는 반드시 엔터 처리. 고질적 문제.
+        return userInput;
     }   // 원하는 문구 출력 + 정수 입력받는 메서드
 
     public static void pause() {
